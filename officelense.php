@@ -47,7 +47,9 @@ class OfficeLense
     // Create Custom Post Type 'Offices'
     add_action( 'init', array( $this, 'ofl_offices_post_type' ) );
 
-    add_action( 'init', array( $this, 'clf_create_branch_taxonomy' ), 0 );
+    add_action( 'init', array( $this, 'ofl_create_branch_taxonomy' ), 0 );
+
+    add_action( 'add_meta_boxes', array( $this, 'ofl_custom_add_metabox' ) );
 
   }
 
@@ -86,7 +88,7 @@ class OfficeLense
    * Create branches taxonomy for the post type "centric_enquire"
    *
    */
-   public function clf_create_branch_taxonomy() {
+   public function ofl_create_branch_taxonomy() {
      $labels = array(
        'name'              => _x( 'Branches', 'contactlense' ),
        'singular_name'     => _x( 'Branch', 'contactlense' ),
@@ -110,7 +112,25 @@ class OfficeLense
      register_taxonomy( 'branch', array( 'offices' ), $args );
    }
 
+   /**
+   * Adds the meta box
+   */
+   public function ofl_custom_add_metabox() {
+     add_meta_box( 'ofl_phone_meta_box', __( 'Office Phone Number', 'officelense' ), array( $this, 'ofl_render_phone_meta_box' ), 'offices', 'side', 'default' );
+   }
+
+   public function ofl_render_phone_meta_box( $post ){
+     // Add nonce for security and authentication.
+     wp_nonce_field( 'ofl_nonce_phone_action', 'custom_phone_nonce' );
+     ?>
+     <label for="ofl_phone"></label>
+      <input type="text" name="ofl_number" value="">
+     <?php
+   }
+
 
 }
 
 new OfficeLense;
+
+?>
