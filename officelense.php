@@ -51,6 +51,17 @@ class OfficeLense
 
     add_action( 'add_meta_boxes', array( $this, 'ofl_custom_add_metabox' ) );
 
+    add_shortcode( 'office-lense', array( $this, 'ofl_branch_grid_shortcode' ) );
+
+    add_action( 'wp_enqueue_scripts', array( $this, 'ofl_load_assets' ) );
+
+  }
+
+  // Enqueue Scripts
+  public function ofl_load_assets()
+  {
+    wp_enqueue_style( 'officelense-css', OFL_PLUGIN_URL . 'css/officelense.css', [], time(), 'all' );
+    wp_enqueue_script( 'officelense-js', OFL_PLUGIN_URL . 'js/officelense.js', ['jquery'], time(), 1 );
   }
 
   /**
@@ -125,6 +136,69 @@ class OfficeLense
      ?>
      <label for="ofl_phone"></label>
       <input type="text" name="ofl_number" value="">
+     <?php
+   }
+
+   // Shortcode Function
+   public function ofl_branch_grid_shortcode() {
+     ?>
+     <section>
+    	<div class="branch__wrapper lense-row">
+    		<div class="branch__offices">
+    			<h3>Regional Offices</h3>
+    			<ul>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    				<li>
+    					<div class="branch__offices--a">
+    						<h4>Bindura</h4>
+    						<p>Veterinary Complex<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
+    					</div>
+    				</li>
+    			</ul>
+    		</div>
+    	</div>
+    </section>
      <?php
    }
 
