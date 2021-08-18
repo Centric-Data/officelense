@@ -1,0 +1,23 @@
+{
+  "name": "Centric-Data/officelense",
+  "description": "Plugin to to list offices/branches",
+  "keywords": [
+    "wordpress",
+    "plugin"
+  ],
+  "homepage": "https://github.com/Centric-Data/officelense",
+  "authors": [
+    {
+      "name": "Doclense",
+      "homepage": "https://centricdata.net"
+    },
+    {
+      "name": "Gillmour Tunhira",
+      "homepage": "https://github.com/gillmourtunhira"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "require":{
+    "php": ">=5.6"
+  }
+}
