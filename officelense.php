@@ -44,16 +44,31 @@ class OfficeLense
 
   public function __construct()
   {
+    // Enqueue Scripts.
+    add_action( 'wp_enqueue_scripts', array( $this, 'ofl_load_assets' ) );
+
+    // Add Shortcode
+    add_shortcode( 'office-lense', array( $this, 'ofl_branch_grid_shortcode' ) );
+
     // Create Custom Post Type 'Offices'
     add_action( 'init', array( $this, 'ofl_offices_post_type' ) );
 
     add_action( 'init', array( $this, 'ofl_create_branch_taxonomy' ), 0 );
 
+    // Create Meta Boxes in CPT offices
     add_action( 'add_meta_boxes', array( $this, 'ofl_custom_add_metabox' ) );
 
-    add_shortcode( 'office-lense', array( $this, 'ofl_branch_grid_shortcode' ) );
+    // CPT Custom Columns
+    add_filter( 'manage_offices_posts_columns', array( $this, 'ofl_slides_columns' ) );
 
-    add_action( 'wp_enqueue_scripts', array( $this, 'ofl_load_assets' ) );
+    // Save Meta Box Data
+    add_action( 'save_post', array( $this, 'ofl_save_meta_box' ) );
+
+    // Fetch Meta Data
+    add_action( 'manage_offices_posts_custom_columns', array( $this, 'ofl_custom_column_data' ), 10, 2 );
+
+    // Register REST Route
+    add_filter( 'rest_route_for_post', array( $this, 'ofl_rest_route_cpt' ), 10, 2 );
 
   }
 
@@ -83,12 +98,16 @@ class OfficeLense
        ),
        'hierarchical'     =>  false,
        'public'           =>  true,
-       'rewrite'          =>  array( 'slug' =>  'office' ),
+       'rewrite'          =>  array(
+         'slug'       =>  'offices/%officescat%/',
+         'with_front' => FALSE
+       ),
        'capability_type'  =>  'post',
-       'has_archive'      =>  true,
+       'has_archive'      =>  'offices',
+       'show_in_rest'     =>  true,
+       'rest_base'        =>  'offices',
+       'rest_controller_class'  =>  'WP_REST_Posts_Controller',
        'supports'         =>  array( 'title', 'editor' ),
-       'exclude_from_search'   =>  true,
-       'publicly_queryable'    =>  false,
        'menu_icon'        =>  'dashicons-location-alt',
      );
 
@@ -127,91 +146,77 @@ class OfficeLense
    * Adds the meta box
    */
    public function ofl_custom_add_metabox() {
-     add_meta_box( 'ofl_phone_meta_box', __( 'Office Phone Number', 'officelense' ), array( $this, 'ofl_render_phone_meta_box' ), 'offices', 'side', 'default' );
-     add_meta_box( 'ofl_email_meta_box', __( 'Office Email', 'officelense' ), array( $this, 'ofl_render_email_meta_box' ), 'offices', 'side', 'default' );
+     add_meta_box( 'office_fields', __( 'Office Details', 'officelense' ), array( $this, 'ofl_render_officebox' ), 'offices', 'advanced', 'high' );
    }
 
-   public function ofl_render_phone_meta_box( $post ){
+   // Render Meta-boxes
+   public function ofl_render_officebox( $post ){
      // Add nonce for security and authentication.
-     wp_nonce_field( 'ofl_nonce_phone_action', 'custom_phone_nonce' );
-     ?>
-     <label for="ofl_phone"></label>
-      <input type="text" name="ofl_number" value="">
-     <?php
-   }
-
-   public function ofl_render_email_meta_box( $post ){
-     // Add nonce for security and authentication.
-     wp_nonce_field( 'ofl_nonce_email_action', 'custom_email_nonce' );
-     ?>
-     <label for="ofl_email"></label>
-      <input type="text" name="ofl_email" value="">
-     <?php
+     include( OFL_LOCATION . '/inc/box_forms.php' );
    }
 
    // Shortcode Function
    public function ofl_branch_grid_shortcode() {
-     ?>
-     <section>
-    	<div class="branch__wrapper lense-row">
-    		<div class="branch__offices">
-    			<h3>Regional Offices</h3>
-    			<ul>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Mashonaland Central Province</h4>
-    						<p>Veterinary Complex<br>Bindura<br> info@zlc.co.zw <br> Tel: +263-266-2106003</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Manicaland Province</h4>
-    						<p>Government Complex, 2nd Floor<br>Mutare<br> info@zlc.co.zw <br> Tel: +263-020-2061307</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Masvingo Province</h4>
-    						<p>Block No.4, Old Government Complex<br>Masvingo<br> info@zlc.co.zw <br> Tel: +263-239-2260744</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Mashonaland East Province</h4>
-    						<p>DA`s Office, Cnr 1st & S. Machel Street<br>Marondera<br> info@zlc.co.zw <br> Tel: +263-279-2325537</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Mashonaland West Province</h4>
-    						<p>Former PA Building, Opposite OK Supermarket<br>Chinhoyi<br> info@zlc.co.zw <br> Tel: +263-0267-2123416</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Matebeleland North Province</h4>
-    						<p>Government Complex (Social Services Building)<br>Cnr Fort Street & 10th Avenue<br>Bulawayo<br> info@zlc.co.zw <br> Tel: +263-029-63669</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Matebeleland South Province</h4>
-    						<p>Mtshabezi Building<br>Cnr 4th Avenue & King Street<br>Gwanda<br> info@zlc.co.zw <br> Tel: +263-0284-2821178</p>
-    					</div>
-    				</li>
-    				<li>
-    					<div class="branch__offices--a">
-    						<h4>Midlands Province</h4>
-    						<p>New Government Complex<br>Gweru<br> info@zlc.co.zw <br> Tel: +263-254-2106003</p>
-    					</div>
-    				</li>
-    			</ul>
-    		</div>
-    	</div>
-    </section>
-     <?php
+     include( OFL_LOCATION . '/inc/shortcodehtml.php' );
    }
 
+   // Register a route
+   public function ofl_rest_route_cpt( $route, $post ){
+     if ( $post->post_type === 'offices' ) {
+       $route = '/wp/v2/offices/' . $post->ID;
+     }
+     return $route;
+   }
+
+   // Custom Slides CPT columns
+   public function ofl_slides_columns( $columns ){
+     $newColumns = array();
+     $newColumns['title']   = 'Office Name';
+     $newColumns['details'] = 'Office Address';
+     $newColumns['phone']   = 'Office Phone';
+     $newColumns['email']   = 'Office Email';
+     $newColumns['date']    = 'Date';
+
+     return $newColumns;
+   }
+
+   // Save data from meta boxes
+   public function ofl_save_meta_box( $post_id ){
+     if( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) return;
+     if ( $parent_id = wp_is_post_revision( $post_id ) ) {
+       $post_id $parent_id;
+     }
+     $fields = [
+       'office_phone',
+       'office_email'
+     ];
+     foreach ( $fields as $field ) {
+       if ( array_key_exists( $field, $_POST ) ) {
+         update_post_meta( $post_id, $field, sanitize_text_field( $_POST[$field] ) );
+       }
+     }
+   }
+
+   // Fetch and populate slider data
+   public function ofl_custom_column_data( $column, $post_id ){
+     switch ( $column ) {
+       case 'details':
+         echo get_the_excerpt();
+         break;
+      case 'phone':
+        $phone = get_post_meta(get_the_ID(), 'office_phone', true);
+        echo $phone;
+      break;
+      case 'email':
+        $email = get_post_meta(get_the_ID(), 'office_email', true);
+        echo $email;
+      break;
+
+       default:
+         // code...
+         break;
+     }
+   }
 
 }
 
